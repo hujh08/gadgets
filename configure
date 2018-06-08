@@ -56,7 +56,7 @@ echo >>$makef
 echo "clean:">>$makef
 for fname in `find . -name '*.sh'`
 do
-    fexe=${fname%.sh}
+    fexe=`basename ${fname%.sh}`
     echo "rm $bindir/$fexe"
 
     echo -e "\trm \$(bindir)/$fexe">>$makef
