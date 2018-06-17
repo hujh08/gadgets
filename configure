@@ -13,10 +13,10 @@ makef=makefile
 # parse options
 prefix='/usr/local'
 
-#ARGS=`getopt -o hp:c --long help,prefix:,clean -n $0 -- "$@"`
-#if [ $? != 0 ]; then USAGE; exit -1; fi
+ARGS=`getopt -o hp:c --long help,prefix:,clean -n $0 -- "$@"`
+if [ $? != 0 ]; then USAGE; exit -1; fi
 
-#eval set -- "$ARGS"
+eval set -- "$ARGS"
 while :
 do
     opt="$1"
@@ -25,7 +25,6 @@ do
         -c|--clean) echo "remove $makef"; rm $makef; exit;;
         -p|--prefix) prefix=$2; shift 2;;
         --) shift; break;;
-        '') shift; break;;
     esac
 done
 
