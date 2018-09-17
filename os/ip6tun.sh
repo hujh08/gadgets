@@ -1,8 +1,20 @@
 #!/bin/bash
 
-eth=`ifconfig -s | sed -n '2p' | cut -d' ' -f 1`
+# eth=`ifconfig -s | sed -n '2p' | cut -d' ' -f 1`
+eths=(`ip -o link show |
+       grep 'link/ether' |
+       awk '{sub(/:$/, "", $2); print $2}'`)
 
-echo "first interfaces: $eth"
+echo -n "${#eths[@]} link/ethers:"
+for e in "${eths[@]}"
+do
+    echo -n " "$e
+done
+echo
+
+eth=${eths[0]}
+
+echo "choose first ether link: $eth"
 
 ipv4=`ifconfig $eth | sed -n '/inet addr:/s/[^0-9 .]//gp'`
 ipv4_addr=`echo $ipv4 | cut -d' ' -f1`
