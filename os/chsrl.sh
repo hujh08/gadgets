@@ -16,6 +16,7 @@ FLAG_APT=-y
 source_dir=/etc/apt
 tmp_dir=/tmp
 tmp_srl=$tmp_dir/sources.list.tmp
+src_bkp=$source_dir/sources.list.bkp  # backup of initial source.list
 
 # source lists
 declare -A srcs
@@ -176,6 +177,11 @@ print_srlof $srl_name > $tmp_srl
 
 if [ $isappend = 1 ]; then
 	cat $source_dir/sources.list >> $tmp_srl
+fi
+
+if [ ! -f $src_bkp ]
+then
+    sudo cp $source_dir/sources.list $src_bkp
 fi
 
 sudo mv -f $tmp_srl $source_dir/sources.list
