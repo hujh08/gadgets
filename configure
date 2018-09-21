@@ -10,6 +10,9 @@ function USAGE() {
 
 makef=makefile
 
+instf=install.sh   # file to specify install method
+uninstf=create-uninstall.sh # file to create uninstall script
+
 # parse options
 prefix='/usr/local'
 
@@ -33,30 +36,104 @@ if [ x"$prefix" != x"/" ]; then prefix=${prefix%/}/; fi
 bindir=${prefix}bin
 echo "prefix: $prefix"
 
-
-cat >$makef <<EOF
-bindir=$bindir
-
-all:
-	echo "all finished"
-
-install:
-EOF
-
-for fname in `find . -name '*.sh'`
+# subprojects
+declare -a projs
+n=0
+for d in `ls`
 do
-    fexe=`basename ${fname%.sh}`
-    echo "$fname ==> $bindir/$fexe"
-
-    echo -e "\tcp $fname \$(bindir)/$fexe">>$makef
+    if [ ! -d "$d" ]; then continue; fi
+    projs[$n]=$d
+    ((n++))
 done
 
-echo >>$makef
-echo "clean:">>$makef
-for fname in `find . -name '*.sh'`
-do
-    fexe=`basename ${fname%.sh}`
-    echo "rm $bindir/$fexe"
+echo -n "${#projs[@]} projects:"
+for d in "${projs[@]}"; do echo -n " $d"; done
+echo
 
-    echo -e "\trm \$(bindir)/$fexe">>$makef
+# basic set
+echo "bindir=$bindir" >$makef
+
+# .PHONY
+echo -ne "\n.PHONY: all install clean" >>$makef
+for d in "${projs[@]}"; do echo -n " $d" >>$makef; done
+for d in "${projs[@]}"; do echo -n " ${d}_clean" >>$makef; done
+echo >>$makef
+
+################################
+########### for make ###########
+
+echo -e "\nall:" >>$makef
+echo -e "\t@echo 'all is ready:'" >>$makef
+
+echo -ne "\t@echo \"    " >>$makef
+## output projects
+echo -n "${#projs[@]} projects:" >>$makef
+for d in "${projs[@]}"; do echo -n " $d" >>$makef; done
+echo "\"" >>$makef
+
+## usage
+echo -e "\t@echo \"    type 'make install' to install all\"" >>$makef
+echo -e "\t@echo \"    type 'make PROJ-NAME' to install single project\"" >>$makef
+
+################################
+####### for install task #######
+
+## make install
+echo -ne "\ninstall:" >>$makef
+for d in "${projs[@]}"; do echo -n " $d" >>$makef; done
+echo >>$makef
+
+## make single project
+echo
+for proj in "${projs[@]}"
+do
+    echo -n "make $proj: "
+    echo -e "\n$proj:" >>$makef
+    echo -e "\t@echo make $proj" >>$makef
+
+    if ! ls "$proj/$instf" &>/dev/null; then
+        echo "normal install"
+        for fname in $(ls $proj)
+        do
+            fexe=${fname%.sh}
+            echo "    $fname ==> $bindir/$fexe"
+            echo -e "\tcp $proj/$fname \$(bindir)/$fexe" >>$makef
+        done
+    else
+        echo "special install"
+        echo "    ./$proj/$instf"
+        echo -e "\t./$proj/$instf" >>$makef
+    fi
+done
+
+################################
+######## for clean task ########
+
+## make clean
+echo -ne "\nclean:" >>$makef
+for d in "${projs[@]}"; do echo -n " ${d}_clean" >>$makef; done
+echo >>$makef
+
+## clean single project
+echo
+for proj in "${projs[@]}"
+do
+    echo -n "clean $proj: "
+    echo -e "\n${proj}_clean:" >>$makef
+    echo -e "\t@echo clean $proj" >>$makef
+
+    if ! ls "$proj/$uninstf" &>/dev/null; then
+        echo "normal clean"
+        for fname in $(ls $proj)
+        do
+            fexe=${fname%.sh}
+            echo "    rm $bindir/$fexe"
+            echo -e "\trm \$(bindir)/$fexe" >>$makef
+        done
+    else
+        echo "special clean"
+        fname_uninst=`./$proj/$uninstf -o $bindir`
+        echo "    $fname_uninst"
+        echo -e "\t$fname_uninst" >>$makef
+    fi
 done
