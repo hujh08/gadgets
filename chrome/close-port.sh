@@ -6,6 +6,8 @@ name=`basename ${0%.sh}`
 
 function USAGE() {
     echo "USAGE: $name port"
+    echo "close a local port"
+    echo
     echo "OPTION:"
     echo "  -h, --help          help"
     echo "  -m, --maxloop       maxloop to kill routines"
@@ -32,6 +34,7 @@ done
 port=$1
 if [ x"$port" == x ]; then
     echo "must specify local port" >&2
+    USAGE >&2
     exit 1
 fi
 
