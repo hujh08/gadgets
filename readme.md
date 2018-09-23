@@ -22,3 +22,6 @@ Setup ipv6 tunnel in Tsinghua University
 
 # chrome
 run chrome with ssh binding proxy
+
+# bash
+a framework to load bash functions in seperated file
