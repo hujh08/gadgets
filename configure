@@ -93,8 +93,9 @@ do
 
     if ! ls "$proj/$instf" &>/dev/null; then
         echo "normal install"
-        for fname in $(ls $proj)
+        for fname in $(ls $proj/*.sh)
         do
+            fname=`basename $fname`
             fexe=${fname%.sh}
             echo "    $fname ==> $bindir/$fexe"
             echo -e "\tcp $proj/$fname \$(bindir)/$fexe" >>$makef
@@ -124,8 +125,9 @@ do
 
     if ! ls "$proj/$uninstf" &>/dev/null; then
         echo "normal clean"
-        for fname in $(ls $proj)
+        for fname in $(ls $proj/*.sh)
         do
+            fname=`basename $fname`
             fexe=${fname%.sh}
             echo "    rm $bindir/$fexe"
             echo -e "\trm \$(bindir)/$fexe" >>$makef
