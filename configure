@@ -4,8 +4,11 @@ function USAGE() {
     echo "Usage: $0 [OPTION]"
     echo "OPTION:"
     echo "  -h, --help      help"
-    echo "  -p, --prefix    prefix directory"
-    echo "  -c, --clean    rm makefile"
+    echo "  -p, --prefix    prefix directory, bin in prefix/bin, config in prefix/config"
+    echo "  -b, --bindir    bin directory"
+    echo "  -c, --condir    configure directory"
+    echo "  -a, --appdir    desktop application directory"
+    echo "  -r, --remove    remove makefile"
 }
 
 makef=makefile
@@ -14,9 +17,11 @@ instf=install.sh   # file to specify install method
 uninstf=create-uninstall.sh # file to create uninstall script
 
 # parse options
-prefix='/usr/local'
+prefix='/usr/local/'
 
-ARGS=`getopt -o hp:c --long help,prefix:,clean -n $0 -- "$@"`
+ARGS=`getopt -o hp:b:c:a:r \
+             --long help,prefix:,bindir:,condir:,appdir:,remove \
+             -n $0 -- "$@"`
 if [ $? != 0 ]; then USAGE; exit -1; fi
 
 eval set -- "$ARGS"
@@ -25,16 +30,26 @@ do
     opt="$1"
     case "$1" in
         -h|--help) USAGE; exit;;
-        -c|--clean) echo "remove $makef"; rm $makef; exit;;
+        -r|--remove) echo "remove $makef"; rm $makef; exit;;
         -p|--prefix) prefix=$2; shift 2;;
+        -b|--bindir) bindir=$2; shift 2;;
+        -c|--condir) condir=$2; shift 2;;
+        -a|--appdir) appdir=$2; shift 2;;
         --) shift; break;;
     esac
 done
 
-if [ x"$prefix" != x"/" ]; then prefix=${prefix%/}/; fi
+if [ "$prefix" != "/" ]; then prefix=${prefix%/}/; fi
 
-bindir=${prefix}bin
+# default set
+if [ -z "$bindir" ]; then bindir=${prefix}bin; fi
+if [ -z "$condir" ]; then condir=${prefix}config; fi
+if [ -z "$appdir" ]; then appdir='/usr/share/applications'; fi
+
 echo "prefix: $prefix"
+echo "bin dir: $bindir"
+echo "config dir: $condir"
+echo "app dir: $appdir"
 
 # subprojects
 declare -a projs
@@ -50,8 +65,13 @@ echo -n "${#projs[@]} projects:"
 for d in "${projs[@]}"; do echo -n " $d"; done
 echo
 
+# create new makefile
+if [ -f $makef ]; then rm $makef; fi
+
 # basic set
-echo "bindir=$bindir" >$makef
+echo "bindir=$bindir" >>$makef
+echo "condir=$condir" >>$makef
+echo "appdir=$appdir" >>$makef
 
 # .PHONY
 echo -ne "\n.PHONY: all install clean" >>$makef
@@ -102,8 +122,8 @@ do
         done
     else
         echo "special install"
-        echo "    ./$proj/$instf"
-        echo -e "\t./$proj/$instf" >>$makef
+        echo "    ./$proj/$instf $bindir $condir $appdir"
+        echo -e "\t./$proj/$instf \$(bindir) \$(condir) \$(appdir)" >>$makef
     fi
 done
 
