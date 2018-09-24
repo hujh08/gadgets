@@ -62,13 +62,15 @@ function LOG_FILE_SET() {
         echo -n "logf: $logf exist. Remove it? yes/[no]: "
         read answer
 
-        if [ -z "$answer" -o "$answer" == no -o "$answer" == n ]
-        then
+        if [ -z "$answer" -o "$answer" == no -o "$answer" == n ]; then
             echo "append to existed logf: $logf"
-        else
+        elif [ "$answer" == yes -o "$answer" == y ]; then
             echo "remove logf $logf"
             rm $logf
             touch $logf
+        else
+            echo "Error: unexpected input: $answer"
+            exit 4
         fi
     fi
 
@@ -104,16 +106,27 @@ function RESTORE_OUTERR() {
     exec 6>&-
 }
 
+function RANDOM_PORT() {
+    local minp maxp range rand
+    minp="$1"
+    maxp="$2"
+
+    range=$((maxp-minp+1))
+
+    rand=$((RANDOM % range))
+
+    echo $((rand+minp))
+}
+
 # default setup
-## environment not work in desktop routine
-# proxy=${CHROME_PROXY_SCHEME-socks5}    # proxy-scheme, use socks5 by default
-# host=localhost
-# port=${CHROME_PROXY_PORT-1209}    # use 1209 by default
-# remote=${CHROME_PROXY_SERVER}   # remote server, user@host
+
+# range to generate a random port if not provided
+minp=1200
+maxp=5000
 
 proxy=socks5
 host=localhost
-port=1209
+port=''
 remote=''
 
 autossh=no   # do not do ssh if local port is closed
@@ -167,6 +180,13 @@ if [ "$logf" ]; then
     LOG_FILE_SET "$logf"
 fi
 
+# if port not provided, generate one randomly
+if [ -z "$port" ]; then
+    echo -n "use a random port: "
+    port=`RANDOM_PORT $minp $maxp`
+    echo $port
+fi
+
 ECHO_CONFIG
 
 if [ -z "$remote" ]; then
@@ -197,11 +217,14 @@ if ! lsof -i:$port &>/dev/null; then
             echo "$answer"
         fi
 
-        if [ -z "$answer" -o "$answer" != no -a "$answer" != n ]
+        if [ -z "$answer" -o "$answer" == no -o "$answer" == n ]
         then
             # echo "answer: [$answer]"
             echo "cannot open port $port"
             exit 1
+        elif [ "$answer" != yes -a "$answer" != y ]; then
+            echo "Error: unexpected input: $answer"
+            exit 5
         fi
     fi
 
@@ -216,4 +239,4 @@ echo "port $port open"
 echo
 echo "google chrome run......"
 google-chrome --proxy-server="${proxy}://${host}:${port}"
-echo "google chrome end"
+echo "google chrome end. port $port still open"
