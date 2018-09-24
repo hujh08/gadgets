@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# create desktop in a directory, in pwd by fault
+
 # most contents of desktop file copied from
 #         /usr/share/applications/google-chrome.desktop
 
@@ -10,9 +12,16 @@ name=google-chrome-proxy.desktop
 script="$1"
 config="$2"
 
-exec="$script -f $config"
+dskdir="$3"  # directory to store desktop file
+if [ -z "$dskdir" ]; then dskdir=$PWD; fi
 
-cat >$name <<EOF
+fname=$dskdir/$name
+echo "create desktop: $fname"
+
+exec="$script -f $config"
+echo "command: $exec"
+
+cat >$fname <<EOF
 [Desktop Entry]
 Version=1.0
 Name=Google Chrome with Proxy
@@ -39,4 +48,4 @@ Name=New Incognito Window
 Exec=/usr/bin/google-chrome-stable --incognito
 EOF
 
-chmod a+x $name
+chmod a+x $fname
