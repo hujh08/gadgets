@@ -33,8 +33,6 @@ function READ_CONFIG() {
     local conf="$1"
     while read field val
     do
-        if [ -z "$field" ]; then continue; fi
-
         case "$field" in
             port) port=$val;;
             proxy-type) proxy=$val;;
@@ -43,7 +41,7 @@ function READ_CONFIG() {
             auto-ssh) autossh=$val;;
             remote-server) remote=$val;;
         esac
-    done <$conf
+    done < <(sed '/^#/d;/^$/d' "$conf")
 }
 
 function ARG_OVERWRITE() {
