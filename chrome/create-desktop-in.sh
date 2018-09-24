@@ -5,17 +5,21 @@
 # most contents of desktop file copied from
 #         /usr/share/applications/google-chrome.desktop
 
-
 name=google-chrome-proxy.desktop
 
+# just output desktop name, and then exit
+if [ "$1" == "-o" ]; then # only output
+    echo "$name"
+    exit
+fi
 
 script="$1"
 config="$2"
 
-dskdir="$3"  # directory to store desktop file
-if [ -z "$dskdir" ]; then dskdir=$PWD; fi
+appdir="$3"  # directory to store desktop file
+if [ -z "$appdir" ]; then appdir=$PWD; fi
 
-fname=$dskdir/$name
+fname="$appdir/$name"
 echo "create desktop: $fname"
 
 exec="$script -f $config"
