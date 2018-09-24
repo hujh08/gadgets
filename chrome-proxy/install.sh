@@ -25,6 +25,10 @@ fi
 
 script_dir="`dirname "$(readlink -f "$0")"`"
 
+proj="$(basename "$script_dir")"
+
+echo "project: $proj"
+
 # user specified directory
 bindir="$1"
 condir="$2"
@@ -32,8 +36,7 @@ condir="$2"
 if [ "$bindir" != "/" ]; then bindir=${bindir%/}; fi
 if [ "$condir" != "/" ]; then condir=${condir%/}/; fi
 
-condir=${condir}chrome
-
+condir=${condir}$proj
 
 # optional
 appdir="$3"

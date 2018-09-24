@@ -20,7 +20,7 @@ Change source list
 ## ip6tun
 Setup ipv6 tunnel in Tsinghua University
 
-# chrome
+# chrome-proxy
 run chrome with ssh binding proxy
 
 # bash
