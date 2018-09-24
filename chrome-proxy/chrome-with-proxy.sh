@@ -238,5 +238,5 @@ echo "port $port open"
 # run chrome with proxy
 echo
 echo "google chrome run......"
-google-chrome --proxy-server="${proxy}://${host}:${port}"
+google-chrome --proxy-server="${proxy}://${host}:${port}" >/dev/null 2>&1
 echo "google chrome end. port $port still open"
