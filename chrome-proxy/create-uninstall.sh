@@ -11,7 +11,7 @@ if [ x"$1" == x"-o" ]; then # only output
     exit
 fi
 
-echo "handle uninstall script"
+echo "create uninstall script"
 
 script_dir="`dirname "$(readlink -f "$0")"`"
 
@@ -44,7 +44,6 @@ do
 done
 
 # clean desktop
-echo
 echo "clean desktop"
 echo "desktop: $appf"
 
@@ -65,7 +64,6 @@ if [ -w "$appdir" ]; then sudo=''; else sudo='sudo '; fi
 echo "${sudo}rm \"$appf\"" >> $fname
 
 # self clean
-echo
 echo "clean uninstall: self destroy"
 echo "script: $name"
 
