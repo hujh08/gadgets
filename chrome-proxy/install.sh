@@ -56,7 +56,7 @@ appdir="$(readlink -f "$appdir")"
 conf=${condir}/config
 
 echo
-echo "install configure:"
+echo "install paths setup:"
 echo "bin dir: $bindir"
 echo "config dir: $condir"
 echo "application dir: $appdir"
@@ -75,15 +75,22 @@ done
 
 # handle initial configure
 echo
-echo "initiate configure"
-cat >$conf <<EOF
-# port LOCAL-PORT
-port-type socks5
-# remote-server USER@SERVER
+echo "handle configure file"
+if [ -f "$conf" ]; then
+    echo "conf: $conf exist."
+    echo "use previous configure file"
+else
+    echo "conf: $conf not exist."
+    echo "create a template configure file."
+    echo -e "${RED}WARNING: fill up commented lines before use${NONE}" >&2
 
-# log-file FILE-NAME
-auto-ssh yes
-EOF
+    echo "# port LOCAL-PORT"            >$conf
+    echo "port-type socks5"            >>$conf
+    echo "# remote-server USER@SERVER" >>$conf
+    echo                               >>$conf
+    echo "# log-file FILE-NAME"        >>$conf
+    echo "auto-ssh yes"                >>$conf
+fi
 
 # handle desktop
 echo
