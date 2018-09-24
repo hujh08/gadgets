@@ -74,6 +74,12 @@ function LOG_FILE_SET() {
         fi
     fi
 
+    logd="$(dirname "$logf")"
+    if [ ! -d "$logd" ]; then
+        echo "directory for log: $logd not exist" >&2
+        exit 1
+    fi
+
     REDIRECT_OUTERR $logf
     # add time stamp
     echo
@@ -142,6 +148,10 @@ remote_arg="$1"
 
 if [ "$conf" ]; then
     echo "config file: $logf"
+    if [ ! -f "$conf" ]; then
+        echo "no configure file: $conf" >&2
+        exit 1
+    fi
     READ_CONFIG "$conf"
 fi
 
