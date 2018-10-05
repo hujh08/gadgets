@@ -39,7 +39,7 @@ if [ x"$port" == x ]; then
 fi
 
 n=0
-while lsof -i:"$port" &>/dev/null
+while sudo lsof -i:"$port" &>/dev/null
 do
     if((n==maxloop)); then
         echo "Error: maxloop $maxloop reached, close port $port failed" >&2
